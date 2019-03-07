@@ -18,7 +18,7 @@ So, at this step, you may have tried to [extract images](https://github.com/gith
 Now that is said, you have some options :
 
 * Buy an _Apple_ device
-* Kindly ask a friend with an _Apple_ device to extract and send you those PNGs (cc @Naernon)
+* Kindly ask a friend with an _Apple_ device to extract and send you those PNGs (cc [@Naernon](https://github.com/Naernon))
 * Change your underneath emojis module / plugin / whatever
 * Wait for the [gemoji project to use another set of emoji](https://github.com/github/gemoji/pull/72)
 * **Download PNGs directly from _GitHub_**, and that is definitely what this is about !
@@ -40,6 +40,18 @@ git clone https://github.com/HorlogeSkynet/SgEExt.git
 
 ```bash
 python3 SgEExt.py --help
+
+# Careful, running without any arguments would download the whole emojis palette (under `./emojis/`) !
+python3 SgEExt.py
+
+# This directory structure will be created if it does not exist.
+python3 SgEExt.py -l joy -d emojis/images/
+
+# Wanna download GitHub added "emojis" (mostly images) ? Sure.
+python3 SgEExt.py -l bow relaxed octocat trollface --verbose
+
+# Wanna download the emojis currently being used in your (Jekyll) blog ?
+python3 SgEExt.py -l $(grep -hREo ':[a-z]+:' /path/to/your/blog/_posts/*.md | sort | uniq | cut -d ':' -f 2) -d /path/to/your/blog/images/emojis/
 ```
 
 ## How does it work ?
