@@ -60,7 +60,7 @@ def download_file(url, path=None):
 
 
 def localize_emoji_install():
-    """Returns the root path of the local gemoji gem install, or `None`"""
+    """Return the root path of the local gemoji gem install, or `None`"""
     try:
         # Try to retrieve the path of the local installation of Gemoji Ruby gem.
         gem_wich_gemoji_output = check_output(
@@ -116,12 +116,15 @@ def perform_emojis_extraction(path, subset):
 
     # Iterate over the elements, looking for "real" emojis and "regular" images.
     for emoji in emojis_db:
-        # The first alias is used for "regular" images names.
-        first_alias = emoji['aliases'][0]
+        if subset:
+            # Intersect our `subset` names with this emoji's aliases !
+            # This allows us to "find" emojis whose user-supplied name is an alternative.
+            match_name = set(emoji['aliases']) & set(subset)
+            if not match_name:
+                continue
 
-        # When the user provided a specific list of emojis, only deal with them.
-        if subset and first_alias not in subset:
-            continue
+            # The _first_ alias in the list is effectively used to compute its unicode value.
+            first_alias = emoji['aliases'][0]
 
         if 'emoji' in emoji:
             # Extract emoji unicode value, and format it as an hexadecimal string.
@@ -149,8 +152,8 @@ def perform_emojis_extraction(path, subset):
                 download_file(url, path)
 
         if subset:
-            # The operations above _should_ be OK, we may remove this element from the list.
-            subset.remove(first_alias)
+            # The operations above _should_ be OK, we may remove this element from the set.
+            subset.remove(match_name.pop())
             if not subset:
                 # We reached the end of the user-supplied elements. We may stop the iteration.
                 break
