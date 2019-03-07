@@ -120,6 +120,7 @@ def perform_emojis_extraction(path, subset):
         os.remove(emojis_db_local_file)
 
     # Iterate over the elements, looking for "real" emojis and "regular" images.
+    i = 0
     for emoji in emojis_db:
         if subset:
             # Intersect our `subset` names with this emoji's aliases !
@@ -161,6 +162,8 @@ def perform_emojis_extraction(path, subset):
                 url = GITHUB_ASSETS_BASE_URL.format(image_name)
                 download_file(url, path)
 
+        i += 1
+
         if subset:
             # The operations above _should_ be OK, we may remove this element from the set.
             subset.remove(match_name.pop())
@@ -174,6 +177,8 @@ def perform_emojis_extraction(path, subset):
             "The following emojis have not been found : \'%s\'",
             '\', \''.join(subset)
         )
+
+    logging.info("Successfully downloaded / copied %i emojis !", i)
 
 
 def main():
@@ -202,7 +207,7 @@ def main():
     )
     parser.add_argument(
         '-v', '--version',
-        action='version', version="%(prog)s : 1.2"
+        action='version', version="%(prog)s : 1.3"
     )
 
     # Normalize the user-supplied target directory.
