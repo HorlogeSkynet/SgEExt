@@ -34,8 +34,13 @@ def open_and_load_emojis_db(file_path):
 
 
 def download_file(url, path=None):
-    """Download a file specified by `url` and save it locally under `path`"""
-    # See <https://stackoverflow.com/a/16696317/10599709>
+    """
+    Download a file specified by `url` and save it locally under `path`.
+    Normalize path and / or create non-existing directory structure.
+    See <https://stackoverflow.com/a/16696317/10599709>
+    """
+
+    # We will save this entity under its remote name.
     file_name = url.split('/')[-1]
 
     if not path:
@@ -60,7 +65,7 @@ def main():
     """Simple entry point"""
     parser = argparse.ArgumentParser(
         description="A simple gemoji emojis extractor for non macOS users",
-        prog="SGEE"
+        prog="SgEExt"
     )
     parser.add_argument(
         '-d', '--directory',
@@ -85,7 +90,7 @@ def main():
         ).strip()
 
         # Now, try to extract its grand-parent location.
-        # Usually : `/var/lib/gems/X.Y.Z/gems/gemoji-T.U.V/lib/gemoji.rb`
+        # Usually `/var/lib/gems/X.Y.Z/gems/gemoji-T.U.V/lib/gemoji.rb` on GNU/Linux.
         # Please check <https://github.com/github/gemoji> project structure.
         gemoji_local_path = re.fullmatch(
             r'^(.+?{0}gemoji-.+?{0})lib{0}gemoji.rb$'.format(
@@ -103,7 +108,7 @@ def main():
         gemoji_local_path = None
 
     # Now, let's try to load the emojis database (JSON).
-    emojis_db, emojis_db_local_file = None, None
+    emojis_db = None
     if gemoji_local_path:
         emojis_db = open_and_load_emojis_db(
             gemoji_local_path + 'db' + os.sep + 'emoji.json'
