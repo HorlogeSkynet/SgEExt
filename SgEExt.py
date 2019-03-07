@@ -197,7 +197,7 @@ def main():
     )
     parser.add_argument(
         '-v', '--version',
-        action='version', version="%(prog)s : 1.1"
+        action='version', version="%(prog)s : 1.2"
     )
 
     # Normalize the user-supplied target directory.
