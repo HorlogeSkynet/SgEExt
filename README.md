@@ -2,6 +2,10 @@
 
 > Pronounced _[sgɪksˈt]_
 
+<p align="center">
+	<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Emoji_u1f419.svg/240px-Emoji_u1f419.svg.png">
+</p>
+
 ## Introduction
 
 Let's have a talk about an _usual_ situation.  
