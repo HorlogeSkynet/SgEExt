@@ -51,6 +51,11 @@ def download_file(url, path=None):
     logging.info("Downloading <%s> to \"%s\"", url, file_name)
 
     with requests.get(url, stream=True) as get_request:
+        if get_request.status_code != 200:
+            # This URL does not exist ; Don't try to download a thing !
+            logging.warning("The URL above does not exist, can\'t download.")
+            return
+
         with open(file_name, 'wb') as f_image:
             for chunk in get_request.iter_content(chunk_size=8192):
                 if chunk:
