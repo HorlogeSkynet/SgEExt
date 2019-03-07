@@ -3,9 +3,9 @@
 
 import argparse
 import json
+import logging
 import os
 import re
-import sys
 
 from shutil import copyfile
 from subprocess import check_output, CalledProcessError
@@ -24,11 +24,8 @@ def open_and_load_emojis_db(file_path):
             emojis_db = json.load(f_emojis_db)
 
     except (FileNotFoundError, json.JSONDecodeError) as error:
-        emojis_db = None
-        print(
-            "Could not read or load the emojis database : {}".format(error),
-            file=sys.stderr
-        )
+        emojis_db = []
+        logging.error("Could not read or load the emojis database : %s", error)
 
     return emojis_db
 
@@ -40,9 +37,6 @@ def download_file(url, path=None):
     See <https://stackoverflow.com/a/16696317/10599709>
     """
 
-    # We will save this entity under its remote name.
-    file_name = url.split('/')[-1]
-
     if not path:
         path = os.getcwd()
 
@@ -52,8 +46,12 @@ def download_file(url, path=None):
     if not os.path.exists(path):
         os.makedirs(path, mode=0o755)
 
+    # We will save this entity under its remote name.
+    file_name = path + url.split('/')[-1]
+    logging.info("Downloading <%s> to \"%s\"", url, file_name)
+
     with requests.get(url, stream=True) as get_request:
-        with open(path + file_name, 'wb') as f_image:
+        with open(file_name, 'wb') as f_image:
             for chunk in get_request.iter_content(chunk_size=8192):
                 if chunk:
                     f_image.write(chunk)
@@ -61,27 +59,8 @@ def download_file(url, path=None):
             f_image.flush()
 
 
-def main():
-    """Simple entry point"""
-    parser = argparse.ArgumentParser(
-        description="A simple gemoji emojis extractor for non macOS users",
-        prog="SgEExt"
-    )
-    parser.add_argument(
-        '-d', '--directory',
-        type=str,
-        default=os.getcwd() + os.sep + 'emojis',
-        help="Extraction path location"
-    )
-    parser.add_argument(
-        '-v', '--version',
-        action='version', version="%(prog)s : 1.0"
-    )
-
-    args = parser.parse_args()
-    if not args.directory.endswith(os.sep):
-        args.directory += os.sep
-
+def localize_emoji_install():
+    """Returns the root path of the local gemoji gem install, or `None`"""
     try:
         # Try to retrieve the path of the local installation of Gemoji Ruby gem.
         gem_wich_gemoji_output = check_output(
@@ -100,6 +79,7 @@ def main():
         )
 
         # If the regex matched, extract the capturing group.
+        # Else, it would be `None` below.
         if gemoji_local_path:
             gemoji_local_path = gemoji_local_path.group(1)
 
@@ -107,8 +87,19 @@ def main():
         # Local gem not available ? Not an issue, we will figure something out.
         gemoji_local_path = None
 
+    return gemoji_local_path
+
+
+def perform_emojis_extraction(path, subset):
+    """
+    Effectively perform the emojis extraction.
+    By default, run extraction on the whole set.
+    The `subset` parameter allows the user to provide a specific list of emojis.
+    """
+
+    gemoji_local_path = localize_emoji_install()
+
     # Now, let's try to load the emojis database (JSON).
-    emojis_db = None
     if gemoji_local_path:
         emojis_db = open_and_load_emojis_db(
             gemoji_local_path + 'db' + os.sep + 'emoji.json'
@@ -125,28 +116,95 @@ def main():
 
     # Iterate over the elements, looking for "real" emojis and "regular" images.
     for emoji in emojis_db:
+        # The first alias is used for "regular" images names.
+        first_alias = emoji['aliases'][0]
+
+        # When the user provided a specific list of emojis, only deal with them.
+        if subset and first_alias not in subset:
+            continue
+
         if 'emoji' in emoji:
             # Extract emoji unicode value, and format it as an hexadecimal string.
             unicode = ''.join(format(ord(char), 'x') for char in emoji['emoji'])
+            logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
             url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
-            download_file(url, args.directory)
+            download_file(url, path)
 
         else:
-            # Those are GitHub "fake" emojis (regular images).
-            image_name = emoji['aliases'][0]
+            # Those are GitHub "fake" emojis ("regular" images).
+            image_name = first_alias
 
             if gemoji_local_path:
                 # We already have it locally somewhere, just copy it...
                 image_name += '.png'
+                logging.info("Copying \'%s\' from your local system", image_name)
                 copyfile(
                     gemoji_local_path + 'images' + os.sep + image_name,
-                    args.directory + image_name
+                    path + image_name
                 )
 
             else:
                 # I told you it was not an issue, let's download it as well !
                 url = GITHUB_ASSETS_BASE_URL.format(image_name)
-                download_file(url, args.directory)
+                download_file(url, path)
+
+        if subset:
+            # The operations above _should_ be OK, we may remove this element from the list.
+            subset.remove(first_alias)
+            if not subset:
+                # We reached the end of the user-supplied elements. We may stop the iteration.
+                break
+
+    # At this moment, `subset` contains only the elements that have not been found...
+    if subset:
+        logging.warning(
+            "The following emojis have not been found : \'%s\'",
+            '\', \''.join(subset)
+        )
+
+
+def main():
+    """Simple entry point"""
+    parser = argparse.ArgumentParser(
+        description="A simple gemoji emojis extractor for non macOS users",
+        prog="SgEExt"
+    )
+    parser.add_argument(
+        '-d', '--directory',
+        type=str,
+        default=os.getcwd() + os.sep + 'emojis',
+        help="Extraction path location"
+    )
+    parser.add_argument(
+        '-l', '--list',
+        type=str,
+        default=[],
+        nargs='+',
+        help="List of emojis aliases to operate on"
+    )
+    parser.add_argument(
+        '--verbose',
+        default=False,
+        action='store_true'
+    )
+    parser.add_argument(
+        '-v', '--version',
+        action='version', version="%(prog)s : 1.1"
+    )
+
+    # Normalize the user-supplied target directory.
+    args = parser.parse_args()
+    if not args.directory.endswith(os.sep):
+        args.directory += os.sep
+
+    # Set format and level for logging.
+    logging.basicConfig(
+        format='[%(levelname)s] : %(message)s',
+        level=(logging.INFO if args.verbose else logging.WARNING)
+    )
+
+    # EXTRACT ALL-THE-THINGS !
+    perform_emojis_extraction(args.directory, args.list)
 
 
 if __name__ == '__main__':
