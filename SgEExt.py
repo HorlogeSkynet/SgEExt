@@ -134,6 +134,11 @@ def perform_emojis_extraction(path, subset):
         if 'emoji' in emoji:
             # Extract emoji unicode value, and format it as an hexadecimal string.
             unicode = ''.join(format(ord(char), 'x') for char in emoji['emoji'])
+
+            # Some emojis contain a "variation selector" at the end of their unicode value.
+            # VS-15 : U+FE0E || VS-16 : U+FE0F
+            unicode = re.sub(r'fe0[ef]$', '', unicode, re.IGNORECASE)
+
             logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
             url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
             download_file(url, path)
