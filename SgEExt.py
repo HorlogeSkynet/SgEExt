@@ -140,6 +140,7 @@ def perform_emojis_extraction(path, subset, force):
         if subset:
             # Intersect our `subset` names with this emoji's aliases !
             # This allows us to "find" emojis whose user-supplied name is an alternative.
+            # For instance : Match `bow`, even if its "official" name is `bowing_man`.
             match_name = set(emoji['aliases']) & set(subset)
             if not match_name:
                 continue
