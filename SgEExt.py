@@ -8,7 +8,7 @@ import os
 import re
 
 from shutil import copyfile
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output, CalledProcessError, DEVNULL
 
 import requests
 
@@ -70,7 +70,8 @@ def localize_emoji_install():
         # Try to retrieve the path of the local installation of Gemoji Ruby gem.
         gem_wich_gemoji_output = check_output(
             ['gem', 'which', 'gemoji'],
-            universal_newlines=True
+            universal_newlines=True,
+            stderr=DEVNULL
         ).strip()
 
         # Now, try to extract its grand-parent location.
@@ -88,9 +89,12 @@ def localize_emoji_install():
         if gemoji_local_path:
             gemoji_local_path = gemoji_local_path.group(1)
 
-    except CalledProcessError:
+    except (FileNotFoundError, CalledProcessError) as error:
         # Local gem not available ? Not an issue, we will figure something out.
         gemoji_local_path = None
+
+    if not gemoji_local_path:
+        logging.info("Localization of the gemoji gem installation failed : %s", error)
 
     return gemoji_local_path
 
