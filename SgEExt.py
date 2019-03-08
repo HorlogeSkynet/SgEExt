@@ -137,7 +137,7 @@ def retrieve_emoji_db(gemoji_local_path):
     return emojis_db
 
 
-def perform_emojis_extraction(path, subset, force):
+def perform_emojis_extraction(path, subset, force, only_real_emojis):
     """
     Effectively perform the emojis extraction.
     By default, run extraction on the whole set.
@@ -173,7 +173,9 @@ def perform_emojis_extraction(path, subset, force):
             url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
             download_file(url, path, force)
 
-        else:
+            i += 1
+
+        elif not only_real_emojis:
             # Those are GitHub "fake" emojis ("regular" images).
             if gemoji_local_path:
                 # We already have it locally somewhere, just copy it...
@@ -197,7 +199,7 @@ def perform_emojis_extraction(path, subset, force):
                 url = GITHUB_ASSETS_BASE_URL.format(first_alias)
                 download_file(url, path, force)
 
-        i += 1
+            i += 1
 
         if subset:
             # The operations above _should_ be OK, we may remove this element from the set.
@@ -236,6 +238,12 @@ def main():
         help="List of emojis aliases to operate on"
     )
     parser.add_argument(
+        '-o', '--only-emojis',
+        default=False,
+        action='store_true',
+        help="Ignores \"fake\" emojis (images) added by GitHub"
+    )
+    parser.add_argument(
         '-f', '--force',
         default=False,
         action='store_true',
@@ -264,7 +272,7 @@ def main():
     )
 
     # EXTRACT ALL-THE-THINGS !
-    perform_emojis_extraction(args.directory, args.list, args.force)
+    perform_emojis_extraction(args.directory, args.list, args.force, args.only_emojis)
 
 
 if __name__ == '__main__':
