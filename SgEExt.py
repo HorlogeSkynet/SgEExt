@@ -242,12 +242,13 @@ def main():
         help="Force file download, even if they already exist"
     )
     parser.add_argument(
-        '--verbose',
+        '-v', '--verbose',
         default=False,
-        action='store_true'
+        action='store_true',
+        help="Show debugging logs and monitor progression"
     )
     parser.add_argument(
-        '-v', '--version',
+        '--version',
         action='version', version="%(prog)s : 1.3"
     )
 
