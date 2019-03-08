@@ -30,7 +30,7 @@ def open_and_load_emojis_db(file_path):
     return emojis_db
 
 
-def download_file(url, path=None):
+def download_file(url, path=None, force=False):
     """
     Download a file specified by `url` and save it locally under `path`.
     Normalize path and / or create non-existing directory structure.
@@ -48,6 +48,15 @@ def download_file(url, path=None):
 
     # We will save this entity under its remote name.
     file_name = path + url.split('/')[-1]
+
+    if not force and os.path.exists(file_name):
+        # This file already exists, skip it when running non-force mode.
+        logging.info(
+            "The file \"%s\" already exists, run `-f` to download it again.",
+            file_name
+        )
+        return
+
     logging.info("Downloading <%s> to \"%s\"", url, file_name)
 
     with requests.get(url, stream=True) as get_request:
@@ -99,7 +108,7 @@ def localize_emoji_install():
     return gemoji_local_path
 
 
-def perform_emojis_extraction(path, subset):
+def perform_emojis_extraction(path, subset, force):
     """
     Effectively perform the emojis extraction.
     By default, run extraction on the whole set.
@@ -116,7 +125,7 @@ def perform_emojis_extraction(path, subset):
 
     else:
         # If we don't have it locally, just temporarily fetch it from the GitHub project.
-        download_file("https://github.com/github/gemoji/raw/master/db/emoji.json")
+        download_file("https://github.com/github/gemoji/raw/master/db/emoji.json", force=force)
         emojis_db_local_file = os.getcwd() + os.sep + 'emoji.json'
         emojis_db = open_and_load_emojis_db(emojis_db_local_file)
         os.remove(emojis_db_local_file)
@@ -148,7 +157,7 @@ def perform_emojis_extraction(path, subset):
 
             logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
             url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
-            download_file(url, path)
+            download_file(url, path, force)
 
         else:
             # Those are GitHub "fake" emojis ("regular" images).
@@ -166,7 +175,7 @@ def perform_emojis_extraction(path, subset):
             else:
                 # I told you it was not an issue, let's download it as well !
                 url = GITHUB_ASSETS_BASE_URL.format(image_name)
-                download_file(url, path)
+                download_file(url, path, force)
 
         i += 1
 
@@ -207,6 +216,12 @@ def main():
         help="List of emojis aliases to operate on"
     )
     parser.add_argument(
+        '-f', '--force',
+        default=False,
+        action='store_true',
+        help="Force file download, even if they already exist"
+    )
+    parser.add_argument(
         '--verbose',
         default=False,
         action='store_true'
@@ -228,7 +243,7 @@ def main():
     )
 
     # EXTRACT ALL-THE-THINGS !
-    perform_emojis_extraction(args.directory, args.list)
+    perform_emojis_extraction(args.directory, args.list, args.force)
 
 
 if __name__ == '__main__':
