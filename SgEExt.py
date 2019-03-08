@@ -116,12 +116,14 @@ def perform_emojis_extraction(path, subset):
 
     else:
         # If we don't have it locally, just temporarily fetch it from the GitHub project.
-        download_file(
-            "https://github.com/github/gemoji/raw/master/db/emoji.json"
-        )
+        download_file("https://github.com/github/gemoji/raw/master/db/emoji.json")
         emojis_db_local_file = os.getcwd() + os.sep + 'emoji.json'
         emojis_db = open_and_load_emojis_db(emojis_db_local_file)
         os.remove(emojis_db_local_file)
+        logging.info(
+            "The temporarily emojis database (\"%s\") has been removed.",
+            emojis_db_local_file
+        )
 
     # Iterate over the elements, looking for "real" emojis and "regular" images.
     i = 0
