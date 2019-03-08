@@ -98,14 +98,43 @@ def localize_emoji_install():
         if gemoji_local_path:
             gemoji_local_path = gemoji_local_path.group(1)
 
+        else:
+            logging.info(
+                "gemoji looks installed on your system, but couldn\'t locate it precisely."
+                " Please open an issue on the project repository."
+            )
+
     except (FileNotFoundError, CalledProcessError) as error:
         # Local gem not available ? Not an issue, we will figure something out.
         gemoji_local_path = None
-
-    if not gemoji_local_path:
         logging.info("Localization of the gemoji gem installation failed : %s", error)
 
     return gemoji_local_path
+
+
+def retrieve_emoji_db(gemoji_local_path):
+    """
+    This function tries anyhow to open and load an emoji database.
+    It may end up locally (see `gemoji_local_path`), or remote (gemoji sources on GitHub).
+    """
+    # Now, let's try to load the emojis database (JSON).
+    if gemoji_local_path:
+        emojis_db = open_and_load_emojis_db(
+            gemoji_local_path + 'db' + os.sep + 'emoji.json'
+        )
+
+    else:
+        # If we don't have it locally, just temporarily fetch it from the GitHub project.
+        download_file("https://github.com/github/gemoji/raw/master/db/emoji.json")
+        emojis_db_local_file = os.getcwd() + os.sep + 'emoji.json'
+        emojis_db = open_and_load_emojis_db(emojis_db_local_file)
+        os.remove(emojis_db_local_file)
+        logging.info(
+            "The temporarily emojis database (\"%s\") has been removed.",
+            emojis_db_local_file
+        )
+
+    return emojis_db
 
 
 def perform_emojis_extraction(path, subset, force):
@@ -116,23 +145,7 @@ def perform_emojis_extraction(path, subset, force):
     """
 
     gemoji_local_path = localize_emoji_install()
-
-    # Now, let's try to load the emojis database (JSON).
-    if gemoji_local_path:
-        emojis_db = open_and_load_emojis_db(
-            gemoji_local_path + 'db' + os.sep + 'emoji.json'
-        )
-
-    else:
-        # If we don't have it locally, just temporarily fetch it from the GitHub project.
-        download_file("https://github.com/github/gemoji/raw/master/db/emoji.json", force=force)
-        emojis_db_local_file = os.getcwd() + os.sep + 'emoji.json'
-        emojis_db = open_and_load_emojis_db(emojis_db_local_file)
-        os.remove(emojis_db_local_file)
-        logging.info(
-            "The temporarily emojis database (\"%s\") has been removed.",
-            emojis_db_local_file
-        )
+    emojis_db = retrieve_emoji_db(gemoji_local_path)
 
     # Iterate over the elements, looking for "real" emojis and "regular" images.
     i = 0
@@ -162,20 +175,26 @@ def perform_emojis_extraction(path, subset, force):
 
         else:
             # Those are GitHub "fake" emojis ("regular" images).
-            image_name = first_alias
-
             if gemoji_local_path:
                 # We already have it locally somewhere, just copy it...
-                image_name += '.png'
-                logging.info("Copying \'%s\' from your local system", image_name)
-                copyfile(
-                    gemoji_local_path + 'images' + os.sep + image_name,
-                    path + image_name
-                )
+                image_name = first_alias + '.png'
+                image_local_path = path + image_name
+                if not force and os.path.exists(image_local_path):
+                    # This file already exists, skip it when running non-force mode.
+                    logging.info(
+                        "The file \"%s\" already exists, run `-f` to copy it again.",
+                        image_local_path
+                    )
+                else:
+                    logging.info("Copying \'%s\' from your local system", image_local_path)
+                    copyfile(
+                        gemoji_local_path + 'images' + os.sep + image_name,
+                        image_local_path
+                    )
 
             else:
                 # I told you it was not an issue, let's download it as well !
-                url = GITHUB_ASSETS_BASE_URL.format(image_name)
+                url = GITHUB_ASSETS_BASE_URL.format(first_alias)
                 download_file(url, path, force)
 
         i += 1
