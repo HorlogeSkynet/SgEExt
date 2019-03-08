@@ -47,10 +47,16 @@ python3 SgEExt.py
 # This directory structure will be created if it does not exist.
 python3 SgEExt.py -l joy -d emojis/images/
 
+# Wanna force re-download of existing files ? Sure.
+python3 SgEExt.py -l joy relaxed sunglasses -d emojis/images/ -f
+
 # Wanna download GitHub added "emojis" (mostly images) ? Sure.
 python3 SgEExt.py -l bow relaxed octocat trollface --verbose
 
-# Wanna download the emojis currently being used in your (Jekyll) blog ?
+# 'octocat' & 'trollface' would be ignored.
+python3 SgEExt.py -l bow relaxed octocat trollface --only-emojis
+
+# Wanna download the emojis currently being used in your (Jekyll) blog ? Sure.
 python3 SgEExt.py -l $(grep -hREo ':[a-z]+:' /path/to/your/blog/_posts/*.md | sort | uniq | cut -d ':' -f 2) -d /path/to/your/blog/images/emojis/
 ```
 
