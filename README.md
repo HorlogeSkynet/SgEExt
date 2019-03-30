@@ -60,7 +60,7 @@ python3 SgEExt.py -l bow relaxed octocat trollface --verbose
 python3 SgEExt.py -l bow relaxed octocat trollface --only-emojis
 
 # Wanna download the emojis currently being used in your (Jekyll) blog ? Sure.
-python3 SgEExt.py -l $(grep -hREo ':[a-z]+:' /path/to/your/blog/_posts/*.md | sort | uniq | cut -d ':' -f 2) -d /path/to/your/blog/images/emojis/
+python3 SgEExt.py -l $(grep -hREo ':[a-z1-9_-]+:' /path/to/your/blog/_posts/*.md | sort | uniq | cut -d ':' -f 2) -d /path/to/your/blog/images/emojis/
 ```
 
 ## How does it work ?
