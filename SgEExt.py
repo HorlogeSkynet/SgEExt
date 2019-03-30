@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+SgEExt is a Simple gemoji Emoji Extractor script, to download (mostly from GitHub) gemoji PNGs.
+The logic is simple but offers some options, just run `[python3] SgEExt[.py] -h` to list them.
+"""
+
 
 import argparse
 import json
