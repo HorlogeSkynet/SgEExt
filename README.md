@@ -50,6 +50,9 @@ python3 SgEExt.py -l joy -d emojis/images/
 # Wanna force re-download of existing files ? Sure.
 python3 SgEExt.py -l joy relaxed sunglasses -d emojis/images/ -f
 
+# Wanna save "real" emojis under their "real" name ? Sure.
+python3 SgEExt.py -l ok_hand -n 
+
 # Wanna download GitHub added "emojis" (mostly images) ? Sure.
 python3 SgEExt.py -l bow relaxed octocat trollface --verbose
 
