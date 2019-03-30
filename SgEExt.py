@@ -35,7 +35,7 @@ def open_and_load_emojis_db(file_path):
     return emojis_db
 
 
-def download_file(url, path=None, force=False):
+def download_file(url, path=None, force=False, real_name=None):
     """
     Download a file specified by `url` and save it locally under `path`.
     Normalize path and / or create non-existing directory structure.
@@ -51,8 +51,11 @@ def download_file(url, path=None, force=False):
     if not os.path.exists(path):
         os.makedirs(path, mode=0o755)
 
-    # We will save this entity under its remote name.
-    file_name = path + url.split('/')[-1]
+    # Save this entity under the specified name, or directly its remote name.
+    if real_name:
+        file_name = path + real_name + '.png'
+    else:
+        file_name = path + url.split('/')[-1]
 
     if not force and os.path.exists(file_name):
         # This file already exists, skip it when running non-force mode.
@@ -142,7 +145,7 @@ def retrieve_emoji_db(gemoji_local_path):
     return emojis_db
 
 
-def perform_emojis_extraction(path, subset, force, only_real_emojis):
+def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis):
     """
     Effectively perform the emojis extraction.
     By default, run extraction on the whole set.
@@ -176,7 +179,7 @@ def perform_emojis_extraction(path, subset, force, only_real_emojis):
 
             logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
             url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
-            download_file(url, path, force)
+            download_file(url, path, force, first_alias if real_names else None)
 
             i += 1
 
@@ -226,7 +229,7 @@ def perform_emojis_extraction(path, subset, force, only_real_emojis):
 def main():
     """Simple entry point"""
     parser = argparse.ArgumentParser(
-        description="A simple gemoji emojis extractor for non macOS users",
+        description="A simple gemoji emojis extractor (for non macOS users)",
         prog="SgEExt"
     )
     parser.add_argument(
@@ -236,6 +239,12 @@ def main():
         help="Extraction path location"
     )
     parser.add_argument(
+        '-f', '--force',
+        default=False,
+        action='store_true',
+        help="Force file download, even if they already exist"
+    )
+    parser.add_argument(
         '-l', '--list',
         type=str,
         default=[],
@@ -243,16 +252,16 @@ def main():
         help="List of emojis aliases to operate on"
     )
     parser.add_argument(
+        '-n', '--names',
+        default=False,
+        action='store_true',
+        help="Save emojis under their \"real\" name instead of unicode"
+    )
+    parser.add_argument(
         '-o', '--only-emojis',
         default=False,
         action='store_true',
         help="Ignores \"fake\" emojis (images) added by GitHub"
-    )
-    parser.add_argument(
-        '-f', '--force',
-        default=False,
-        action='store_true',
-        help="Force file download, even if they already exist"
     )
     parser.add_argument(
         '-v', '--verbose',
@@ -277,7 +286,8 @@ def main():
     )
 
     # EXTRACT ALL-THE-THINGS !
-    perform_emojis_extraction(args.directory, args.list, args.force, args.only_emojis)
+    perform_emojis_extraction(
+        args.directory, args.force, args.list, args.names, args.only_emojis)
 
 
 if __name__ == '__main__':
