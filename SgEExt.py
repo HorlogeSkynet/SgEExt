@@ -20,6 +20,8 @@ import requests
 
 # Emojis and "regular" images are served by GitHub here.
 GITHUB_ASSETS_BASE_URL = "https://github.githubassets.com/images/icons/emoji/{}.png"
+# The emojis database from the gemoji project is hosted here.
+EMOJI_DB_URL = "https://github.com/github/gemoji/raw/master/db/emoji.json"
 
 
 def open_and_load_emojis_db(file_path):
@@ -133,7 +135,7 @@ def retrieve_emoji_db(gemoji_local_path):
 
     else:
         # If we don't have it locally, just temporarily fetch it from the GitHub project.
-        download_file("https://github.com/github/gemoji/raw/master/db/emoji.json")
+        download_file(EMOJI_DB_URL)
         emojis_db_local_file = os.getcwd() + os.sep + 'emoji.json'
         emojis_db = open_and_load_emojis_db(emojis_db_local_file)
         os.remove(emojis_db_local_file)
