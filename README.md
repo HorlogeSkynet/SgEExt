@@ -71,6 +71,9 @@ The script... :
 * ... iterates through the elements and extracts their unicode value as hexadecimal
 * ... uses the above result to download them from _GitHub_
 
+As `githubassets.com` is actually a CDN, it does not _look_ rate-limited.  
+Anyway, I cannot take any responsibility for any inappropriate usage of this software.
+
 ## Compatibility
 
 Although SgEExt has been developed with cross-platform constraints, it **has not been tested on _Windows_ yet**.  
