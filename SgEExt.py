@@ -179,6 +179,9 @@ def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis)
             # VS-15 : U+FE0E || VS-16 : U+FE0F
             unicode = re.sub(r'fe0[ef]$', '', unicode, re.IGNORECASE)
 
+            # For "shrugging" emojis only (`1f937-*`), we have to replace `200d` by a real hyphen.
+            unicode = re.sub(r'^(1f937)(?:200d)(.*)$', r'\1-\2', unicode, re.IGNORECASE)
+
             logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
             url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
             download_file(url, path, force, first_alias if real_names else None)
