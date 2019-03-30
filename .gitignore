@@ -1,3 +1,7 @@
+# Project specific entries
+# Ignore PNG as users will likely retrieve images directly here
+*.png
+
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
