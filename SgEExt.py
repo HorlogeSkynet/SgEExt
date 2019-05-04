@@ -97,7 +97,7 @@ def localize_emoji_install():
         # Usually `/var/lib/gems/X.Y.Z/gems/gemoji-T.U.V/lib/gemoji.rb` on GNU/Linux.
         # Please check <https://github.com/github/gemoji> project structure.
         gemoji_local_path = re.fullmatch(
-            r'^(.+?{0}gemoji-.+?{0})lib{0}gemoji.rb$'.format(
+            r"^(.+?{0}gemoji-.+?{0})lib{0}gemoji.rb$".format(
                 re.escape(os.sep)
             ),
             gem_wich_gemoji_output
@@ -225,7 +225,7 @@ def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis)
     if subset:
         logging.warning(
             "The following emojis have not been found : \'%s\'",
-            '\', \''.join(subset)
+            "\', \'".join(subset)
         )
 
     logging.info("Successfully downloaded / copied %i emojis !", i)
@@ -286,7 +286,7 @@ def main():
 
     # Set format and level for logging.
     logging.basicConfig(
-        format='[%(levelname)s] : %(message)s',
+        format="[%(levelname)s] : %(message)s",
         level=(logging.INFO if args.verbose else logging.WARNING)
     )
 
