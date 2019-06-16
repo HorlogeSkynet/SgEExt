@@ -150,6 +150,54 @@ def retrieve_emoji_db(gemoji_local_path):
     return emojis_db
 
 
+def handle_emoji_extraction(emoji, first_alias, path, force, real_names):
+    """Simple function reduce `perform_emojis_extraction` cyclomatic complexity"""
+
+    # Extract emoji unicode value, and format it as an hexadecimal string.
+    unicode = ''.join(format(ord(char), 'x') for char in emoji['emoji'])
+
+    # Some emojis contain a "variation selector" at the end of their unicode value.
+    # VS-15 : U+FE0E || VS-16 : U+FE0F
+    unicode = re.sub(r'fe0[ef]$', '', unicode, re.IGNORECASE)
+
+    # For "shrugging" emojis only (`1f937-*`), we have to replace `200d` by a real hyphen.
+    unicode = re.sub(r'^(1f937)(?:200d)(.*)$', r'\1-\2', unicode, re.IGNORECASE)
+
+    # For "flags" emojis only (`1f1??1f1??`), we have to add an extra hyphen...
+    unicode = re.sub(r'^(1f1)(..)(1f1)(..)$', r'\1\2-\3\4', unicode, re.IGNORECASE)
+
+    logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
+    url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
+    return download_file(url, path, force, first_alias if real_names else None)
+
+
+def handle_github_emojis(first_alias, gemoji_local_path, path, force):
+    """Simple function reduce `perform_emojis_extraction` cyclomatic complexity"""
+
+    if gemoji_local_path:
+        # We already have it locally somewhere, just copy it...
+        image_name = first_alias + '.png'
+        image_local_path = path + image_name
+        if not force and os.path.exists(image_local_path):
+            # This file already exists, skip it when running non-force mode.
+            logging.info(
+                "The file \"%s\" already exists, run `-f` to copy it again.",
+                image_local_path
+            )
+        else:
+            logging.info("Copying \'%s\' from your local system", image_local_path)
+            copyfile(
+                gemoji_local_path + 'images' + os.sep + image_name,
+                image_local_path
+            )
+
+        return True
+
+    # I told you it was not an issue, let's download it as well !
+    url = GITHUB_ASSETS_BASE_URL.format(first_alias)
+    return download_file(url, path, force)
+
+
 def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis):
     """
     Effectively perform the emojis extraction.
@@ -175,50 +223,13 @@ def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis)
             first_alias = emoji['aliases'][0]
 
         if 'emoji' in emoji:
-            # Extract emoji unicode value, and format it as an hexadecimal string.
-            unicode = ''.join(format(ord(char), 'x') for char in emoji['emoji'])
-
-            # Some emojis contain a "variation selector" at the end of their unicode value.
-            # VS-15 : U+FE0E || VS-16 : U+FE0F
-            unicode = re.sub(r'fe0[ef]$', '', unicode, re.IGNORECASE)
-
-            # For "shrugging" emojis only (`1f937-*`), we have to replace `200d` by a real hyphen.
-            unicode = re.sub(r'^(1f937)(?:200d)(.*)$', r'\1-\2', unicode, re.IGNORECASE)
-
-            # For "flags" emojis only (`1f1??1f1??`), we have to add an extra hyphen...
-            unicode = re.sub(r'^(1f1)(..)(1f1)(..)$', r'\1\2-\3\4', unicode, re.IGNORECASE)
-
-            logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
-            url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
-            if download_file(url, path, force, first_alias if real_names else None):
+            if handle_emoji_extraction(emoji, first_alias, path, force, real_names):
                 i += 1
 
         elif not only_real_emojis:
             # Those are GitHub "fake" emojis ("regular" images).
-            if gemoji_local_path:
-                # We already have it locally somewhere, just copy it...
-                image_name = first_alias + '.png'
-                image_local_path = path + image_name
-                if not force and os.path.exists(image_local_path):
-                    # This file already exists, skip it when running non-force mode.
-                    logging.info(
-                        "The file \"%s\" already exists, run `-f` to copy it again.",
-                        image_local_path
-                    )
-                else:
-                    logging.info("Copying \'%s\' from your local system", image_local_path)
-                    copyfile(
-                        gemoji_local_path + 'images' + os.sep + image_name,
-                        image_local_path
-                    )
-
+            if handle_github_emojis(first_alias, gemoji_local_path, path, force):
                 i += 1
-
-            else:
-                # I told you it was not an issue, let's download it as well !
-                url = GITHUB_ASSETS_BASE_URL.format(first_alias)
-                if download_file(url, path, force):
-                    i += 1
 
         if subset:
             # The operations above _should_ be OK, we may remove this element from the set.
