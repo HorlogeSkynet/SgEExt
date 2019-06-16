@@ -41,6 +41,7 @@ def download_file(url, path=None, force=False, real_name=None):
     """
     Download a file specified by `url` and save it locally under `path`.
     Normalize path and / or create non-existing directory structure.
+    Returns `True` on success, and `False` on error.
     See <https://stackoverflow.com/a/16696317/10599709>
     """
 
@@ -65,7 +66,7 @@ def download_file(url, path=None, force=False, real_name=None):
             "The file \"%s\" already exists, run `-f` to download it again.",
             file_name
         )
-        return
+        return True
 
     logging.info("Downloading <%s> to \"%s\"", url, file_name)
 
@@ -73,7 +74,7 @@ def download_file(url, path=None, force=False, real_name=None):
         if get_request.status_code != 200:
             # This URL does not exist ; Don't try to download a thing !
             logging.warning("The URL above does not exist, can\'t download.")
-            return
+            return False
 
         with open(file_name, 'wb') as f_image:
             for chunk in get_request.iter_content(chunk_size=8192):
@@ -81,6 +82,8 @@ def download_file(url, path=None, force=False, real_name=None):
                     f_image.write(chunk)
 
             f_image.flush()
+
+    return True
 
 
 def localize_emoji_install():
@@ -184,9 +187,8 @@ def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis)
 
             logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
             url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
-            download_file(url, path, force, first_alias if real_names else None)
-
-            i += 1
+            if download_file(url, path, force, first_alias if real_names else None):
+                i += 1
 
         elif not only_real_emojis:
             # Those are GitHub "fake" emojis ("regular" images).
@@ -207,12 +209,13 @@ def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis)
                         image_local_path
                     )
 
+                i += 1
+
             else:
                 # I told you it was not an issue, let's download it as well !
                 url = GITHUB_ASSETS_BASE_URL.format(first_alias)
-                download_file(url, path, force)
-
-            i += 1
+                if download_file(url, path, force):
+                    i += 1
 
         if subset:
             # The operations above _should_ be OK, we may remove this element from the set.
