@@ -59,6 +59,9 @@ python3 SgEExt.py -l bow relaxed octocat trollface --verbose
 # 'octocat' & 'trollface' would be ignored.
 python3 SgEExt.py -l bow relaxed octocat trollface --only-emojis
 
+# Handle duplicates ('uk' and 'gb' refer to the same emoji).
+python3 SgEExt.py -l fr gb us jp uk jp gb it
+
 # Wanna download the emojis currently being used in your (Jekyll) blog ? Sure.
 python3 SgEExt.py -l $(grep -hREo ':[a-z1-9_-]+:' /path/to/your/blog/_posts/*.md | sort | uniq | cut -d ':' -f 2) -d /path/to/your/blog/images/emojis/
 ```
