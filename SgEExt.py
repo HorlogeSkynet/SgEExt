@@ -258,7 +258,7 @@ def main():
     parser.add_argument(
         '-d', '--directory',
         type=str,
-        default=os.getcwd() + os.sep + 'emojis',
+        default=os.getcwd() + os.sep + 'emoji',
         help="Extraction path location"
     )
     parser.add_argument(
