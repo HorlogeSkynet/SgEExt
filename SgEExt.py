@@ -32,7 +32,7 @@ def open_and_load_emojis_db(file_path):
 
     except (FileNotFoundError, json.JSONDecodeError) as error:
         emojis_db = []
-        logging.error("Could not read or load the emojis database : %s", error)
+        logging.error("Could not read or load the emojis database : %s.", error)
 
     return emojis_db
 
@@ -120,7 +120,7 @@ def localize_emoji_install():
     except (FileNotFoundError, CalledProcessError) as error:
         # Local gem not available ? Not an issue, we will figure something out.
         gemoji_local_path = None
-        logging.info("Localization of the gemoji gem installation failed : %s", error)
+        logging.info("Localization of the gemoji gem installation failed : %s.", error)
 
     return gemoji_local_path
 
@@ -185,7 +185,7 @@ def handle_github_emojis(first_alias, gemoji_local_path, path, force):
                 image_local_path
             )
         else:
-            logging.info("Copying \'%s\' from your local system", image_local_path)
+            logging.info("Copying \'%s\' from your local system.", image_local_path)
             copyfile(
                 gemoji_local_path + 'images' + os.sep + image_name,
                 image_local_path
