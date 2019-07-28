@@ -41,7 +41,9 @@ git clone https://github.com/HorlogeSkynet/SgEExt.git
 ```bash
 python3 SgEExt.py --help
 
-# Careful, running without any arguments would download the whole emojis palette (under `./emojis/`) !
+# Careful, running without any arguments would download the whole emojis palette !
+# Resulting files will be set under `emoji/unicode/` (automatically created).
+# Microsoft GitHub's emojis (images) will be set under `emoji/`.
 python3 SgEExt.py
 
 # This directory structure will be created if it does not exist.

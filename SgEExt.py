@@ -46,10 +46,7 @@ def download_file(url, path=None, force=False, real_name=None):
     """
 
     if not path:
-        path = os.getcwd()
-
-    if not path.endswith(os.sep):
-        path += os.sep
+        path = os.getcwd() + os.sep
 
     if not os.path.exists(path):
         os.makedirs(path, mode=0o755)
@@ -168,7 +165,12 @@ def handle_emoji_extraction(emoji, first_alias, path, force, real_names):
 
     logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
     url = GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode)
-    return download_file(url, path, force, first_alias if real_names else None)
+    return download_file(
+        url,
+        path + 'unicode' + os.sep,
+        force,
+        first_alias if real_names else None
+    )
 
 
 def handle_github_emojis(first_alias, gemoji_local_path, path, force):
@@ -309,8 +311,7 @@ def main():
     )
 
     # EXTRACT ALL-THE-THINGS !
-    perform_emojis_extraction(
-        args.directory, args.force, args.list, args.names, args.only_emojis)
+    perform_emojis_extraction(args.directory, args.force, args.list, args.names, args.only_emojis)
 
 
 if __name__ == '__main__':
