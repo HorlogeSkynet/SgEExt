@@ -9,19 +9,19 @@
 ## Introduction
 
 Let's have a talk about an _usual_ situation.  
-You run a self-hosted _Jekyll_ blog, with the [jemoji](https://github.com/jekyll/jemoji) plugin loaded so as to "enhanced" your content with some emojis.  
+You run a self-hosted _Jekyll_ blog, with the [jemoji](https://github.com/jekyll/jemoji) plugin loaded so as to "enhance" your content with some emojis.  
 You'd have noticed that [by default](https://github.com/jekyll/jemoji#emoji-images) the plugin renders your static pages with `<img>` whose `src` attributes are pointing to a _GitHub_'s (_Microsoft_'s) location.  
 The latter means that **a third-party _is able_** (note that it _may_ not be the case) **to log people who consult your website**, and thus **is a privacy issue**.
 
 So, at this step, you may have tried to [extract images](https://github.com/github/gemoji#extract-images) to serve it yourself, but **the operation is only possible from a macOS system** ('cause _Apple_ emojis are present within the system font, and... [gemoji is mainly using the "Apple's emoji character palette"](https://github.com/github/gemoji/blob/b04991b001e137c06cc56cebcabf0e458b5eea44/CONTRIBUTING.md#readme)).
 
-Now that is said, you have some options :
+Now that is said, there are your options :
 
 * Buy an _Apple_ device
 * Kindly ask a friend with an _Apple_ device to extract and send you those PNGs (cc [@Naernon](https://github.com/Naernon))
 * Change your underneath emojis module / plugin / whatever
 * Wait for the [gemoji project to use another set of emoji](https://github.com/github/gemoji/pull/72)
-* **Download PNGs directly from _GitHub_**, and that is definitely what this is about !
+* **Download PNGs directly from _GitHub_**, and that is definitely what this project is about !
 
 ## Dependencies
 
