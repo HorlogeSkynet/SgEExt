@@ -2,9 +2,7 @@
 
 > Pronounced _[sgɪksˈt]_
 
-<p align="center">
-	<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Emoji_u1f419.svg/240px-Emoji_u1f419.svg.png">
-</p>
+<p align="center"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Emoji_u1f419.svg/240px-Emoji_u1f419.svg.png"></p>
 
 ## Introduction
 
@@ -53,7 +51,7 @@ python3 SgEExt.py -l joy -d emojis/images/
 python3 SgEExt.py -l joy relaxed sunglasses -d emojis/images/ -f
 
 # Wanna save "real" emojis under their "real" name ? Sure.
-python3 SgEExt.py -l ok_hand -n 
+python3 SgEExt.py -l ok_hand -n
 
 # Wanna download GitHub added "emojis" (mostly images) ? Sure.
 python3 SgEExt.py -l bow relaxed octocat trollface --verbose

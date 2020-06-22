@@ -15,7 +15,7 @@ import re
 from shutil import copyfile
 from subprocess import check_output, CalledProcessError, DEVNULL
 
-import requests
+import requests  # pylint: disable=import-error
 
 
 # Emojis and "regular" images are served by GitHub here.
