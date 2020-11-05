@@ -37,33 +37,33 @@ git clone https://github.com/HorlogeSkynet/SgEExt.git
 ## Usage
 
 ```bash
-python3 SgEExt.py --help
+python3 sgeext.py --help
 
 # Careful, running without any arguments would download the whole emojis palette !
 # Resulting files will be set under `emoji/unicode/` (automatically created).
 # Microsoft GitHub's emojis (images) will be set under `emoji/`.
-python3 SgEExt.py
+python3 sgeext.py
 
 # This directory structure will be created if it does not exist.
-python3 SgEExt.py -l joy -d emojis/images/
+python3 sgeext.py -l joy -d emojis/images/
 
 # Wanna force re-download of existing files ? Sure.
-python3 SgEExt.py -l joy relaxed sunglasses -d emojis/images/ -f
+python3 sgeext.py -l joy relaxed sunglasses -d emojis/images/ -f
 
 # Wanna save "real" emojis under their "real" name ? Sure.
-python3 SgEExt.py -l ok_hand -n
+python3 sgeext.py -l ok_hand -n
 
 # Wanna download GitHub added "emojis" (mostly images) ? Sure.
-python3 SgEExt.py -l bow relaxed octocat trollface --verbose
+python3 sgeext.py -l bow relaxed octocat trollface --verbose
 
 # 'octocat' & 'trollface' would be ignored.
-python3 SgEExt.py -l bow relaxed octocat trollface --only-emojis
+python3 sgeext.py -l bow relaxed octocat trollface --only-emojis
 
 # Handle duplicates ('uk' and 'gb' refer to the same emoji).
-python3 SgEExt.py -l fr gb us jp uk jp gb it
+python3 sgeext.py -l fr gb us jp uk jp gb it
 
 # Wanna download the emojis currently being used in your (Jekyll) blog ? Sure.
-python3 SgEExt.py -l $(grep -hREo ':[a-z+-]+[a-z1-9_-]+:' /path/to/your/blog/_posts/*.md | sort | uniq | cut -d ':' -f 2) -d /path/to/your/blog/images/emojis/
+python3 sgeext.py -l $(grep -hREo ':[a-z+-]+[a-z1-9_-]+:' /path/to/your/blog/_posts/*.md | sort | uniq | cut -d ':' -f 2) -d /path/to/your/blog/images/emojis/
 ```
 
 ## How does it work ?

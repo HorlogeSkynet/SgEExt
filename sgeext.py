@@ -2,7 +2,7 @@
 
 """
 SgEExt is a Simple gemoji Emoji Extractor script, to download (mostly from GitHub) gemoji PNGs.
-The logic is simple but offers some options, just run `[python3] SgEExt[.py] -h` to list them.
+The logic is simple but offers some options, just run `[python3] sgeext[.py] -h` to list them.
 """
 
 
@@ -254,8 +254,7 @@ def perform_emojis_extraction(path, force, subset, real_names, only_real_emojis)
 def main():
     """Simple entry point"""
     parser = argparse.ArgumentParser(
-        description="A simple gemoji emojis extractor (for non macOS users)",
-        prog="SgEExt"
+        description="A simple gemoji emojis extractor (for non macOS users)"
     )
     parser.add_argument(
         '-d', '--directory',
