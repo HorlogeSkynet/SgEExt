@@ -5,7 +5,9 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Run Pylint on sgeext.py
+    name: Run Pylint and Mypy on SgEExt
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
 
     steps:
