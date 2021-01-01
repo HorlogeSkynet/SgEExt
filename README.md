@@ -18,7 +18,7 @@ Now that is said, there are your options :
 * Buy an _Apple_ device
 * Kindly ask a friend with an _Apple_ device to extract and send you those PNGs (cc [@Naernon](https://github.com/Naernon))
 * Change your underneath emojis module / plugin / whatever
-* Wait for the [gemoji project to use another set of emoji](https://github.com/github/gemoji/pull/72)
+* ~~Wait for the [gemoji project to use another set of emoji](https://github.com/github/gemoji/pull/72)~~
 * **Download PNGs directly from _GitHub_**, and that is definitely what this project is about !
 
 ## Dependencies
