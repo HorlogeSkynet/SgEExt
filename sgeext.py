@@ -138,7 +138,13 @@ def retrieve_emoji_db(gemoji_local_path: str = None) -> List[dict]:
     return emojis_db
 
 
-def handle_emoji_extraction(emoji: dict, first_alias: str, path: str, force: bool, real_names):
+def handle_emoji_extraction(
+        emoji: dict,
+        first_alias: str,
+        path: str,
+        force: bool,
+        real_names: bool
+    ):
     """Simple function reduce `perform_emojis_extraction` cyclomatic complexity"""
 
     # Extract emoji unicode value, and format it as an hexadecimal string.
@@ -167,7 +173,7 @@ def handle_emoji_extraction(emoji: dict, first_alias: str, path: str, force: boo
 def handle_github_emojis(
         first_alias: str, path: str, force: bool, gemoji_local_path: str = None
     ) -> bool:
-    """Simple function reduce `perform_emojis_extraction` cyclomatic complexity"""
+    """Simple function reducing `perform_emojis_extraction` cyclomatic complexity"""
     if not gemoji_local_path:
         # I told you it was not an issue, let's download it as well !
         return download_file(
@@ -231,7 +237,7 @@ def perform_emojis_extraction(
                 i += 1
 
         if subset:
-            # The operations above _should_ be OK, we may remove these elementss from the set.
+            # The operations above _should_ be OK, we may remove these elements from the set.
             for match_name in match_names:
                 subset.remove(match_name)
             if not subset:
