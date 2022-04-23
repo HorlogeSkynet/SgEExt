@@ -99,18 +99,19 @@ def localize_emoji_install() -> Optional[str]:
     # Now, try to extract its grand-parent location.
     # Usually `/var/lib/gems/X.Y.Z/gems/gemoji-T.U.V/lib/gemoji.rb` on GNU/Linux.
     # Please check <https://github.com/github/gemoji> project structure.
+    escaped_path_sep = re.escape(os.sep)
     gemoji_local_path = re.fullmatch(
-        r"^(.+?{0}gemoji-.+?{0})lib{0}gemoji\.rb$".format(re.escape(os.sep)),
+        fr"^(.+?{escaped_path_sep}gemoji-.+?{escaped_path_sep})lib{escaped_path_sep}gemoji\.rb$",
         gem_wich_gemoji_output
     )
-    if not gemoji_local_path:
+    if gemoji_local_path is None:
         logging.info(
-            "gemoji looks installed on your system, but couldn\'t locate it precisely."
+            "gemoji looks installed on your system, but couldn't locate it precisely."
             " Please open an issue on the project repository."
         )
         return None
 
-    logging.info("Found gemoji gem installation folder : \'%s\'.", gemoji_local_path.group(1))
+    logging.info("Found gemoji gem installation folder : %s.", gemoji_local_path.group(1))
     return gemoji_local_path.group(1)
 
 
