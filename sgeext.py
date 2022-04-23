@@ -28,7 +28,7 @@ EMOJI_DB_URL = "https://github.com/github/gemoji/raw/master/db/emoji.json"
 def open_and_load_emojis_db(file_path: str) -> List[dict]:
     """Open `file_path`, load its content as JSON and return it"""
     try:
-        with open(file_path, encoding='utf-8') as f_emojis_db:
+        with open(file_path, mode='rb') as f_emojis_db:
             emojis_db = json.load(f_emojis_db)
 
     except (FileNotFoundError, json.JSONDecodeError) as error:
