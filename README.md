@@ -23,7 +23,7 @@ Now that is said, there are your options :
 
 ## Dependencies
 
-* `python3` (>= 3.5)
+* `python3` (>= 3.6)
 * `python3-requests`
 
 ## Installation
