@@ -28,7 +28,7 @@ EMOJI_DB_URL = "https://github.com/github/gemoji/raw/master/db/emoji.json"
 def open_and_load_emojis_db(file_path: str) -> List[dict]:
     """Open `file_path`, load its content as JSON and return it"""
     try:
-        with open(file_path, mode='rb') as f_emojis_db:
+        with open(file_path, mode="rb") as f_emojis_db:
             emojis_db = json.load(f_emojis_db)
 
     except (FileNotFoundError, json.JSONDecodeError) as error:
@@ -52,27 +52,24 @@ def download_file(url: str, path: str = None, force: bool = False, real_name: st
 
     # Save this entity under the specified name, or directly its remote name.
     if real_name:
-        file_name = os.path.join(path, real_name + '.png')
+        file_name = os.path.join(path, real_name + ".png")
     else:
-        file_name = os.path.join(path, url.split('/')[-1])
+        file_name = os.path.join(path, url.split("/")[-1])
 
     if not force and os.path.exists(file_name):
         # This file already exists, skip it when running non-force mode.
-        logging.info(
-            "The file \"%s\" already exists, run `-f` to download it again.",
-            file_name
-        )
+        logging.info("The file %s already exists, run `-f` to download it again.", file_name)
         return True
 
-    logging.info("Downloading <%s> to \"%s\"", url, file_name)
+    logging.info("Downloading <%s> to %s", url, file_name)
 
     with requests.get(url, stream=True) as get_request:
         if get_request.status_code != 200:
             # This URL does not exist ; Don't try to download a thing !
-            logging.warning("The URL above does not exist, can\'t download.")
+            logging.warning("The URL above does not exist, can't download.")
             return False
 
-        with open(file_name, 'wb') as f_image:
+        with open(file_name, "wb") as f_image:
             for chunk in get_request.iter_content(chunk_size=8192):
                 if chunk:
                     f_image.write(chunk)
@@ -87,9 +84,9 @@ def localize_emoji_install() -> Optional[str]:
     try:
         # Try to retrieve the path of the local installation of Gemoji Ruby gem.
         gem_wich_gemoji_output = check_output(
-            ['gem', 'which', 'gemoji'],
+            ["gem", "which", "gemoji"],
             universal_newlines=True,
-            stderr=DEVNULL
+            stderr=DEVNULL,
         ).strip()
     except (FileNotFoundError, CalledProcessError) as error:
         # Local gem not available ? Not an issue, we will figure something out.
@@ -101,8 +98,8 @@ def localize_emoji_install() -> Optional[str]:
     # Please check <https://github.com/github/gemoji> project structure.
     escaped_path_sep = re.escape(os.sep)
     gemoji_local_path = re.fullmatch(
-        fr"^(.+?{escaped_path_sep}gemoji-.+?{escaped_path_sep})lib{escaped_path_sep}gemoji\.rb$",
-        gem_wich_gemoji_output
+        rf"^(.+?{escaped_path_sep}gemoji-.+?{escaped_path_sep})lib{escaped_path_sep}gemoji\.rb$",
+        gem_wich_gemoji_output,
     )
     if gemoji_local_path is None:
         logging.info(
@@ -111,7 +108,7 @@ def localize_emoji_install() -> Optional[str]:
         )
         return None
 
-    logging.info("Found gemoji gem installation folder : %s.", gemoji_local_path.group(1))
+    logging.info("Found gemoji gem installation folder : %s", gemoji_local_path.group(1))
     return gemoji_local_path.group(1)
 
 
@@ -122,89 +119,70 @@ def retrieve_emoji_db(gemoji_local_path: str = None) -> List[dict]:
     """
     # Now, let's try to load the emojis database (JSON).
     if gemoji_local_path:
-        return open_and_load_emojis_db(
-            os.path.join(gemoji_local_path + 'db', 'emoji.json')
-        )
+        return open_and_load_emojis_db(os.path.join(gemoji_local_path + "db", "emoji.json"))
 
     # If we don't have it locally, just temporarily fetch it from the GitHub project.
     download_file(EMOJI_DB_URL)
-    emojis_db_local_file = os.path.join(os.getcwd(), 'emoji.json')
+    emojis_db_local_file = os.path.join(os.getcwd(), "emoji.json")
     emojis_db = open_and_load_emojis_db(emojis_db_local_file)
     os.remove(emojis_db_local_file)
-    logging.info(
-        "The temporarily emojis database (\"%s\") has been removed.",
-        emojis_db_local_file
-    )
+    logging.info("The temporarily emojis database (%s) has been removed.", emojis_db_local_file)
 
     return emojis_db
 
 
 def handle_emoji_extraction(
-        emoji: dict,
-        first_alias: str,
-        path: str,
-        force: bool,
-        real_names: bool
-    ):
+    emoji: dict, first_alias: str, path: str, force: bool, real_names: bool
+):
     """Simple function reduce `perform_emojis_extraction` cyclomatic complexity"""
 
-    # Extract emoji unicode value, and format it as an hexadecimal string.
-    unicode = ''.join(format(ord(char), 'x') for char in emoji['emoji'])
+    # Extract emoji Unicode value, and format it as an hexadecimal string.
+    code = "".join(format(ord(char), "x") for char in emoji["emoji"])
 
-    # Some emojis contain a "variation selector" at the end of their unicode value.
+    # Some emojis contain a "variation selector" at the end of their Unicode value.
     # VS-15 : U+FE0E || VS-16 : U+FE0F
-    unicode = re.sub(r'fe0[ef]$', '', unicode, re.IGNORECASE)
+    code = re.sub(r"fe0[ef]$", "", code, re.IGNORECASE)
 
     # For "shrugging" emojis only (`1f937-*`), we have to replace `200d` by a real hyphen.
-    unicode = re.sub(r'^(1f937)(?:200d)(.*)$', r'\1-\2', unicode, re.IGNORECASE)
+    code = re.sub(r"^(1f937)(?:200d)(.*)$", r"\1-\2", code, re.IGNORECASE)
 
     # For "flags" emojis only (`1f1??1f1??`), we have to add an extra hyphen...
-    unicode = re.sub(r'^(1f1)(..)(1f1)(..)$', r'\1\2-\3\4', unicode, re.IGNORECASE)
+    code = re.sub(r"^(1f1)(..)(1f1)(..)$", r"\1\2-\3\4", code, re.IGNORECASE)
 
-    logging.info("Unicode value of \'%s\' found : %s", first_alias, unicode)
+    logging.info("Inferred %s Unicode value for %s", code, first_alias)
 
     return download_file(
-        url=GITHUB_ASSETS_BASE_URL.format('unicode/' + unicode),
-        path=os.path.join(path, 'unicode'),
+        url=GITHUB_ASSETS_BASE_URL.format("unicode/" + code),
+        path=os.path.join(path, "unicode"),
         force=force,
-        real_name=(first_alias if real_names else None)
+        real_name=(first_alias if real_names else None),
     )
 
 
 def handle_github_emojis(
-        first_alias: str, path: str, force: bool, gemoji_local_path: str = None
-    ) -> bool:
+    first_alias: str, path: str, force: bool, gemoji_local_path: str = None
+) -> bool:
     """Simple function reducing `perform_emojis_extraction` cyclomatic complexity"""
     if not gemoji_local_path:
         # I told you it was not an issue, let's download it as well !
-        return download_file(
-            url=GITHUB_ASSETS_BASE_URL.format(first_alias),
-            path=path,
-            force=force
-        )
+        return download_file(url=GITHUB_ASSETS_BASE_URL.format(first_alias), path=path, force=force)
 
     # We already have it locally somewhere, just copy it...
-    image_name = first_alias + '.png'
+    image_name = first_alias + ".png"
     image_local_path = os.path.join(path, image_name)
     if not force and os.path.exists(image_local_path):
         # This file already exists, skip it when running non-force mode.
-        logging.info(
-            "The file \"%s\" already exists, run `-f` to copy it again.",
-            image_local_path
-        )
+        logging.info("The file %s already exists, run `-f` to copy it again.", image_local_path)
     else:
-        logging.info("Copying \'%s\' from your local system.", image_local_path)
-        copyfile(
-            os.path.join(gemoji_local_path, 'images', image_name),
-            image_local_path
-        )
+        logging.info("Copying %s from your local system.", image_local_path)
+        copyfile(os.path.join(gemoji_local_path, "images", image_name), image_local_path)
 
     return True
 
 
 def perform_emojis_extraction(
-        path: str, force: bool, subset: List[str], real_names: bool, only_real_emojis: bool
-    ):
+    path: str, force: bool, subset: List[str], real_names: bool, only_real_emojis: bool
+):
     """
     Effectively perform the emojis extraction.
     By default, run extraction on the whole set.
@@ -221,14 +199,14 @@ def perform_emojis_extraction(
             # Intersect our `subset` names with this emoji's aliases !
             # This allows us to "find" emojis whose user-supplied name is an alternative.
             # For instance : Match `bow`, even if its "official" name is `bowing_man`.
-            match_names = set(emoji['aliases']) & set(subset)
+            match_names = set(emoji["aliases"]) & set(subset)
             if not match_names:
                 continue
 
-            # The _first_ alias in the list is effectively used to compute its unicode value.
-            first_alias = emoji['aliases'][0]
+            # The _first_ alias in the list is effectively used to compute its Unicode value.
+            first_alias = emoji["aliases"][0]
 
-        if 'emoji' in emoji:
+        if "emoji" in emoji:
             if handle_emoji_extraction(emoji, first_alias, path, force, real_names):
                 i += 1
 
@@ -247,10 +225,7 @@ def perform_emojis_extraction(
 
     # At this moment, `subset` contains only the elements that have not been found...
     if subset:
-        logging.warning(
-            "The following emojis have not been found : \'%s\'",
-            "\', \'".join(subset)
-        )
+        logging.warning("The following emojis have not been found : %s", "', '".join(subset))
 
     logging.info("Successfully downloaded / copied %i emojis !", i)
 
@@ -261,45 +236,52 @@ def main():
         description="A simple gemoji emojis extractor (for non macOS users)"
     )
     parser.add_argument(
-        '-d', '--directory',
+        "-d",
+        "--directory",
         type=str,
-        default=os.path.join(os.getcwd(), 'emoji'),
-        help="Extraction path location"
+        default=os.path.join(os.getcwd(), "emoji"),
+        help="Extraction path location",
     )
     parser.add_argument(
-        '-f', '--force',
+        "-f",
+        "--force",
         default=False,
-        action='store_true',
-        help="Force file download, even if they already exist"
+        action="store_true",
+        help="Force file download, even if they already exist",
     )
     parser.add_argument(
-        '-l', '--list',
+        "-l",
+        "--list",
         type=str,
         default=[],
-        nargs='+',
-        help="List of emojis aliases to operate on"
+        nargs="+",
+        help="List of emojis aliases to operate on",
     )
     parser.add_argument(
-        '-n', '--names',
+        "-n",
+        "--names",
         default=False,
-        action='store_true',
-        help="Save emojis under their \"real\" name instead of unicode"
+        action="store_true",
+        help='Save emojis under their "real" name instead of Unicode',
     )
     parser.add_argument(
-        '-o', '--only-emojis',
+        "-o",
+        "--only-emojis",
         default=False,
-        action='store_true',
-        help="Ignores \"fake\" emojis (images) added by GitHub"
+        action="store_true",
+        help='Ignores "fake" emojis (images) added by GitHub',
     )
     parser.add_argument(
-        '-v', '--verbose',
+        "-v",
+        "--verbose",
         default=False,
-        action='store_true',
-        help="Show debugging logs and monitor progression"
+        action="store_true",
+        help="Show debugging logs and monitor progression",
     )
     parser.add_argument(
-        '--version',
-        action='version', version="%(prog)s : 2.5.0"
+        "--version",
+        action="version",
+        version="%(prog)s : 2.5.0",
     )
 
     # Normalize the user-supplied target directory.
@@ -308,12 +290,12 @@ def main():
     # Set format and level for logging.
     logging.basicConfig(
         format="[%(levelname)s] : %(message)s",
-        level=(logging.INFO if args.verbose else logging.WARNING)
+        level=(logging.INFO if args.verbose else logging.WARNING),
     )
 
     # EXTRACT ALL-THE-THINGS !
     perform_emojis_extraction(args.directory, args.force, args.list, args.names, args.only_emojis)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
