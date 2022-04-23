@@ -16,7 +16,7 @@ from shutil import copyfile
 from subprocess import check_output, CalledProcessError, DEVNULL
 from typing import List, Optional
 
-import requests  # pylint: disable=import-error
+import requests
 
 
 # Emojis and "regular" images are served by GitHub here.
