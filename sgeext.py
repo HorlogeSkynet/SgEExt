@@ -194,6 +194,7 @@ def perform_emojis_extraction(
 
     # Iterate over the elements, looking for "real" emojis and "regular" images.
     i = 0
+    first_alias = None
     for emoji in emojis_db:
         if subset:
             # Intersect our `subset` names with this emoji's aliases !
@@ -206,7 +207,7 @@ def perform_emojis_extraction(
             # The _first_ alias in the list is effectively used to compute its Unicode value.
             first_alias = emoji["aliases"][0]
 
-        if "emoji" in emoji:
+        if "emoji" in emoji and first_alias is not None:
             if handle_emoji_extraction(emoji, first_alias, path, force, real_names):
                 i += 1
 
