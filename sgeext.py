@@ -63,7 +63,7 @@ def download_file(url: str, path: str = None, force: bool = False, real_name: st
 
     logging.info("Downloading <%s> to %s", url, file_name)
 
-    with requests.get(url, stream=True) as get_request:
+    with requests.get(url, stream=True, timeout=60) as get_request:
         if get_request.status_code != 200:
             # This URL does not exist ; Don't try to download a thing !
             logging.warning("The URL above does not exist, can't download.")
