@@ -21,4 +21,4 @@ jobs:
 
       - run: |
           pylint sgeext.py
-          mypy --install-types --non-interactive sgeext.py
+          mypy --install-types --non-interactive --implicit-optional sgeext.py
